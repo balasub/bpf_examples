@@ -35,18 +35,18 @@ BPFCODE    = hello_bpf
 CFLAGS += $(shell grep -q "define HAVE_ATTR_TEST 1" ${KERNEL_DIR}/tools/perf/perf-sys.h \
                   && echo "-DHAVE_ATTR_TEST=0")
 
-.PHONY : clean $(CLANG) bpfload build
+.PHONY: clean $(CLANG) bpfload build
 
-clean :
+clean:
 	rm -f *.o *.so $(EXECUTABLE)
 
-build : ${BPFCODE.c} ${BPFLOADER}
-	$(CLANG) -O2 -target bpf -c $(BPFCODE:=.c) $(CCINCLUDE) -o ${BPFCODE:=.o}
+build: $(BPFCODE).c $(BPFLOADER)
+	$(CLANG) -O2 -target bpf -c $(BPFCODE).c $(CCINCLUDE) -o $(BPFCODE).o
 
-bpfload : build
+bpfload: build
 	clang $(CFLAGS) -o $(EXECUTABLE) -lelf $(LOADINCLUDE) $(LIBRARY_PATH) $(BPFSO) \
         $(BPFLOADER) loader.c
 
-$(EXECUTABLE) : bpfload
+$(EXECUTABLE): bpfload
 
 .DEFAULT_GOAL := $(EXECUTABLE)
